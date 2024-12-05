@@ -2,8 +2,13 @@
   # https://devenv.sh/packages/
   packages = with pkgs; [
     git
+    gnupg
+    lazygit
+    commitizen
+
     fastfetch
     btop
+
     bat
     yazi
   ];
