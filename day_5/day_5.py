@@ -133,6 +133,7 @@ up the middle page numbers after correctly ordering just those updates?
 
 from pathlib import Path
 from collections import defaultdict
+import operator
 import re
 
 # input_file = Path("sample.txt")
@@ -186,7 +187,7 @@ def is_manual_valid(manual: list[str]) -> bool:
 
 
 def fix_manual(manual: list[str]) -> list[str]:
-    fixed_manual = {}
+    fixed_manual = defaultdict(int)
 
     # For each page, count the number of *other* pages from the manual that are
     # in its follow set. Pages with the highest priority will have the highest
@@ -207,7 +208,7 @@ def fix_manual(manual: list[str]) -> list[str]:
     fixed_manual = [
         page
         for (page, count) in sorted(
-            fixed_manual.items(), key=fixed_manual.get, reverse=True
+            fixed_manual.items(), key=operator.itemgetter(1), reverse=True
         )
     ]
 
