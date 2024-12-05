@@ -33,7 +33,10 @@
     settings = {
       image = "ghcr.io/cachix/devenv:latest";
       customizations.vscode.extensions = [
+        "vscodevim.vim"
         "mkhl.direnv"
+        "christian-kohler.path-intellisense"
+        "tonybaloney.vscode-pets"
         "ms-python.python"
       ];
     };
