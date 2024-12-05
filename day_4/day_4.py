@@ -102,36 +102,19 @@ data = np.array(data)
 
 
 # Ref: https://stackoverflow.com/a/43311126
-def forward_diags(matrix: np.ndarray) -> list[list[str]]:
+def generate_forward_diags(matrix: np.ndarray) -> list[list[str]]:
     height, width = matrix.shape
 
     # Make an entry for each of the possible diagonals
-    f_diags = [[] for _ in range(height + width - 1)]
+    diags = [[] for _ in range(height + width - 1)]
 
     for i in range(height):
         for j in range(width):
             entry = str(matrix[j][i])
 
-            f_diags[i + j].append(entry)
+            diags[i + j].append(entry)
 
-    return f_diags
-
-
-def backward_diags(matrix: np.ndarray) -> list[list[str]]:
-    height, width = matrix.shape
-
-    # Make an entry for each of the possible diagonals
-    b_diags = [[] for _ in range(height + width - 1)]
-    # Offset the backward diagonal
-    min_bdiag = -height + 1
-
-    for i in range(height):
-        for j in range(width):
-            entry = str(matrix[j][i])
-
-            b_diags[i - j - min_bdiag].append(entry)
-
-    return b_diags
+    return diags
 
 
 def count_pattern(l: np.ndarray, pattern: str) -> int:
@@ -154,8 +137,8 @@ def count_pattern(l: np.ndarray, pattern: str) -> int:
 rows = data.copy()
 cols = np.rot90(rows)
 
-f_diags = forward_diags(rows)
-b_diags = backward_diags(rows)
+f_diags = generate_forward_diags(rows)
+b_diags = generate_forward_diags(rows)
 
 p1_pattern = "XMAS"
 p1 = (
@@ -181,8 +164,8 @@ grids = np.array(grids)
 p2_pattern = "MAS"
 p2 = 0
 for grid in grids:
-    gf_diag = forward_diags(grid)
-    gb_diag = backward_diags(grid)
+    gf_diag = generate_forward_diags(grid)
+    gb_diag = generate_forward_diags(np.rot90(grid))
 
     if count_pattern(gf_diag, p2_pattern) and count_pattern(gb_diag, p2_pattern):
         p2 += 1
