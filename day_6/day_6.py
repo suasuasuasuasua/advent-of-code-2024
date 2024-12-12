@@ -120,9 +120,9 @@ input_file = Path("sample.txt")
 input_file = Path("input.txt")
 
 with open(input_file, "r") as file_in:
-    board = [[c for c in row.strip()] for row in file_in.readlines()]
+    og_board = [[c for c in row.strip()] for row in file_in.readlines()]
 
-board = np.array(board)
+og_board = np.array(og_board)
 
 move_rotations = {
     # Up
@@ -177,7 +177,7 @@ def find_next_pos(
             # ^ (idx=3)
             #
             # # (idx=5) (don't look here)
-            ys = ys[ys < y]
+            ys = ys[ys <= y]
 
             # If we have any viable obstacles, set the next locations
             if ys.size:
@@ -186,13 +186,16 @@ def find_next_pos(
                 # The Y (UD) will be one unit away from the closest obstacle
                 next_y = ys[-1] + 1
 
+                # Capture the moves (go backward in y-direction)
+                moves = {(yi, x) for yi in range(y, next_y - 1, -1)}
+
             # If there are no obstacles, walk off the board!
             else:
                 next_x = x
                 next_y = -1
 
-            # Capture the moves (go backward in y-direction)
-            moves = {(yi, x) for yi in range(y, next_y, -1)}
+                # Capture the moves (go backward in y-direction)
+                moves = {(yi, x) for yi in range(y, next_y, -1)}
 
         case "v":
             locs = mask[:, x].nonzero()
@@ -206,7 +209,7 @@ def find_next_pos(
             # v (idx=3)
             #
             # # (idx=5)
-            ys = ys[ys > y]
+            ys = ys[ys >= y]
 
             # If we have any viable obstacles, set the next locations
             if ys.size:
@@ -215,13 +218,16 @@ def find_next_pos(
                 # The Y (UD) will be one unit away from the closest obstacle
                 next_y = ys[0] - 1
 
+                # Capture the moves (go forward in y-direction)
+                moves = {(yi, x) for yi in range(y, next_y + 1, 1)}
+
             # If there are no obstacles, walk off the board!
             else:
                 next_x = x
                 next_y = height
 
-            # Capture the moves (go forward in y-direction)
-            moves = {(yi, x) for yi in range(y, next_y, 1)}
+                # Capture the moves (go forward in y-direction)
+                moves = {(yi, x) for yi in range(y, next_y, 1)}
 
         case ">":
             locs = mask[y, :].nonzero()
@@ -231,7 +237,7 @@ def find_next_pos(
             # Only consider the obstacles that have an index less
             # (idx=0)   (idx=1)    (idx=2) (look here!)
             #    #         >          #
-            xs = xs[xs > x]
+            xs = xs[xs >= x]
 
             # If we have any viable obstacles, set the next locations
             if xs.size:
@@ -240,13 +246,16 @@ def find_next_pos(
                 # The Y (UD) is the same since we're in the same row still
                 next_y = y
 
+                # Capture the moves (go forward)
+                moves = {(y, xi) for xi in range(x, next_x + 1, 1)}
+
             # If there are no obstacles, walk off the board!
             else:
                 next_x = width
                 next_y = y
 
-            # Capture the moves (go forward)
-            moves = {(y, xi) for xi in range(x, next_x, 1)}
+                # Capture the moves (go forward)
+                moves = {(y, xi) for xi in range(x, next_x, 1)}
 
         case "<":
             locs = mask[y, :].nonzero()
@@ -256,7 +265,7 @@ def find_next_pos(
             # Only consider the obstacles that have an index less
             # (idx=0) (look here!)  (idx=1)    (idx=2)
             #    #                     <          #
-            xs = xs[xs < x]
+            xs = xs[xs <= x]
 
             # If we have any viable obstacles, set the next locations
             if xs.size:
@@ -265,13 +274,16 @@ def find_next_pos(
                 # The Y (UD) is the same since we're in the same row still
                 next_y = y
 
+                # Capture the moves (go forward)
+                moves = {(y, xi) for xi in range(x, next_x - 1, -1)}
+
             # If there are no obstacles, walk off the board!
             else:
                 next_x = -1
                 next_y = y
 
-            # Capture the moves (go forward)
-            moves = {(y, xi) for xi in range(x, next_x, -1)}
+                # Capture the moves (go forward)
+                moves = {(y, xi) for xi in range(x, next_x, -1)}
 
         case _:
             print(f"Something has gone horribly wrong!")
@@ -280,41 +292,110 @@ def find_next_pos(
     return next_y, next_x, moves
 
 
-def out_of_bounds(board: np.ndarray, next_y: int, next_x: int) -> bool:  #
+def out_of_bounds(board: np.ndarray, next_pos: tuple[int, int]) -> bool:  #
     height, width = board.shape
+    next_y, next_x = next_pos
 
     return next_y >= height or next_y < 0 or next_x >= width or next_x < 0
 
 
 def move(
     board: np.ndarray, direction: str, location: tuple[int, int]
-) -> tuple[np.ndarray, set[tuple[int, int]], bool]:
+) -> tuple[np.ndarray, set[tuple[int, int]], tuple[int, int]]:
     # Find the span between the current position and the next obstacle ("#")
     y, x = location
     next_y, next_x, moves = find_next_pos(board, direction, y, x)
 
-    # We've found a non-obstacle
-    if out_of_bounds(board, next_y, next_x):
-        return board, moves, True
-
     # Erase the previous position
     board[y, x] = "."
+    next_pos = next_y, next_x
+
     # Move the guard and rotate 90 degrees
     board[next_y, next_x] = move_rotations[direction]
 
-    return board, moves, False
+    return board, moves, next_pos
 
 
 # Part 1: Find all distinct location for the guard
 distinct_moves = set()
+board = og_board.copy()
 while True:
     direction, location = find_guard(board)
-    board, moves, end = move(board, direction, location)
+    board, moves, next_pos = move(board, direction, location)
 
     distinct_moves |= moves
-    if end:
+
+    if out_of_bounds(board, next_pos):
         break
 
 p1 = len(distinct_moves)
 
 print(f"Part 1: {p1}")
+
+# Part 2 (got help from Reddit xd)
+# My initial thought was to add one obstacle to each and every square (brute
+# force)
+# I also thought about trying to find "bounding boxes" (idk cause shapes are
+# bigger)
+#
+# Many people just ended up doing the brute which I guess is fine...
+#
+# I think I basically run something like part 1 for NxM boards. But the idea is
+# that I want to track if I'm in an infinite loop or not (BFS maybe?)
+
+
+def generate_boards(board: np.ndarray):
+    boards = []
+
+    height, width = board.shape
+    for i in range(height):
+        for j in range(width):
+            # Don't put an obstacle over an obstacle (duh)
+            if board[i][j] == "#" or board[i][j] in move_rotations.keys():
+                continue
+
+            # Otherwise, create a new copy of the board as if we've put an
+            # obstacle
+            new_board = board.copy()
+            new_board[i][j] = "#"
+
+            boards.append(new_board)
+
+    return boards
+
+
+possible_boards = generate_boards(og_board)
+p2 = 0
+
+for i, board in enumerate(possible_boards):
+    print(i)
+    # Simulate each of the boards
+    unique_edges = set()
+    while True:
+        direction, location = find_guard(board)
+        board, moves, next_pos = move(board, direction, location)
+        # We've found a non-obstacle, i.e. the end of the board
+        if out_of_bounds(board, next_pos):
+            break
+
+        # Else, we should track if the guard is in an infinite loop by looking
+        # at the times they bumped into obstacles
+        match direction:
+            case "^":
+                final_pos = direction, next_pos
+            case ">":
+                final_pos = direction, next_pos
+            case "v":
+                final_pos = direction, next_pos
+            case "<":
+                final_pos = direction, next_pos
+            case _:
+                exit(1)
+
+        if final_pos in unique_edges:
+            p2 += 1
+            break
+
+        unique_edges.add(final_pos)
+
+print(f"Part 2: {p2}")
