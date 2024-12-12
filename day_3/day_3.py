@@ -64,10 +64,9 @@ Handle the new instructions; what do you get if you add up all of the results of
 just the enabled multiplications?
 """
 
-import re
 import functools
+import re
 from pathlib import Path
-
 
 # file_name = Path("sample.txt")
 file_name = Path("input.txt")

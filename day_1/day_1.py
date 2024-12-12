@@ -77,9 +77,8 @@ Your actual left and right lists contain many location IDs. What is the total
 distance between your lists?
 """
 
-from pathlib import Path
 import functools
-
+from pathlib import Path
 
 # input_file = Path("./sample.txt")
 input_file = Path("./input.txt")

@@ -114,6 +114,7 @@ before leaving the mapped area?
 """
 
 from pathlib import Path
+
 import numpy as np
 
 input_file = Path("sample.txt")

@@ -62,6 +62,11 @@
     # Python
     poetry-check.enable = true;
     black.enable = true;
+    isort = {
+      enable = true;
+      settings.profile = "black";
+    };
+    autoflake.enable = true;
   };
 
   # See full reference at https://devenv.sh/reference/options/

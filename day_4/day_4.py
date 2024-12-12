@@ -88,6 +88,7 @@ try again. How many times does an X-MAS appear?
 """
 
 from pathlib import Path
+
 import numpy as np
 
 file_name = Path("sample.txt")

@@ -80,7 +80,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 # input_file = Path("./sample.txt")
 input_file = Path("./input.txt")
 
@@ -106,7 +105,6 @@ def check_report(report: list[int], part_2: bool = False) -> bool:
     #  respectively
     # [ 0 ] [ -1 0 ] [ -1 1 ] [ 0 1 ] [-1 0 1] are also possible values which
     # indicate some mix of signs (not good!)
-    u_signs = np.unique(signs)
 
     # Count up the frequency for each sign
     freq_counts = {k: v for k, v in np.array(np.unique(signs, return_counts=True)).T}

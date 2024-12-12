@@ -131,10 +131,10 @@ Find the updates which are not in the correct order. What do you get if you add
 up the middle page numbers after correctly ordering just those updates?
 """
 
-from pathlib import Path
-from collections import defaultdict
 import operator
 import re
+from collections import defaultdict
+from pathlib import Path
 
 # input_file = Path("sample.txt")
 input_file = Path("input.txt")
