@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        // Default
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        // devenv
+        "**/.devenv": true,
+        "**/.devenv.flake.nix": true,
+        "**/.direnv": true,
+        // python
+        "**/.venv": true,
+    }
+}
