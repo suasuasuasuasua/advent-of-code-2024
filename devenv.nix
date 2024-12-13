@@ -28,6 +28,12 @@
     };
   };
 
+  languages.rust = {
+    enable = true;
+    channel = "nixpkgs";
+    components = ["rustc" "cargo" "clippy" "rustfmt" "rust-analyzer"];
+  };
+
   devcontainer = {
     enable = true;
     settings = {
@@ -67,6 +73,9 @@
       settings.profile = "black";
     };
     autoflake.enable = true;
+
+    # Rust
+    rustfmt.enable = true;
   };
 
   # See full reference at https://devenv.sh/reference/options/
