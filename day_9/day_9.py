@@ -110,13 +110,11 @@ Start over, now compacting the amphipod's hard drive using this new method
 instead. What is the resulting filesystem checksum?
 """
 
-import copy
 import functools
-import re
 from pathlib import Path
 
 input_file = Path("sample.txt")
-# input_file = Path("input.txt")
+input_file = Path("input.txt")
 
 with open(input_file, "r") as file_in:
     # This input is just one line :)
@@ -131,40 +129,33 @@ for i, digit in enumerate(data):
 
     match parity:
         case 0:
-            og_layout.extend([str(counter) for _ in range(digit)])
+            og_layout.extend([f"{counter}"] * digit)
             counter += 1
         case 1:
-            og_layout.extend(["." for _ in range(digit)])
+            og_layout.extend([f"."] * digit)
 
+# copy the layout since we'll be modifying it in-place
+p1_layout = og_layout.copy()
 
-def find_last_num(l: list[str]) -> int:
-    for i, c in enumerate(l[::-1]):
-        if c != ".":
-            return len(l) - i - 1
+# Two pointer approach
+left, right = -1, len(p1_layout)
 
-    return -1
-
-
-# any number
-num_pattern = re.compile(r"\d")
-
-index = 0
-
-layout = copy.copy(og_layout)
-try:
-    while (gap := layout.index(".", index)) != -1 and num_pattern.match(
-        "".join(layout), gap - 1
+# Stop when the left pointer has crossed the right pointer
+while left <= right:
+    # Find the first empty slot (from the left)
+    while (
+        0 <= (left := left + 1) < len(p1_layout)
+        and not (left_ele := p1_layout[left]) == "."
     ):
-        # Find the farthest integer on the right
-        last_idx = find_last_num(layout)
-        last_num = layout[last_idx]
+        ...
+    # Find the first memory chunk (from the right)
+    while (
+        0 <= (right := right - 1) < len(p1_layout)
+        and (right_ele := p1_layout[right]) == "."
+    ):
+        ...
 
-        # Swap the first dot with the last integer
-        layout[gap], layout[last_idx] = last_num, layout[gap]
-
-        index = gap + 1
-except ValueError:
-    print("No more matches!")
+    p1_layout[left], p1_layout[right] = right_ele, left_ele
 
 
 def checksum(acc: int, cur: tuple[int, int]) -> int:
@@ -173,8 +164,7 @@ def checksum(acc: int, cur: tuple[int, int]) -> int:
     return acc + (index * int(num))
 
 
-layout = [c for c in layout if c != "."]
-
-p1 = functools.reduce(checksum, enumerate(layout), 0)
+p1_layout = [i for i in p1_layout if i not in ["."]]
+p1 = functools.reduce(checksum, enumerate(p1_layout), 0)
 
 print(f"Part 1: {p1}")
